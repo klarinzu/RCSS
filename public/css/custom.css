@@ -1,0 +1,101 @@
+.login-page {
+    background-image: url('/uploads/images/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+}
+
+.login-box {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+.login-logo img {
+    max-width: 200px;
+    margin-bottom: 20px;
+}
+
+.login-box .card-footer,
+.auth-page .card-footer {
+    background-color: transparent !important;
+    border-top: none !important;
+    padding: 0.75rem 1.25rem;
+}
+
+.login-box .card,
+.auth-page .card {
+    background-color: transparent !important;
+}
+
+/* Dashboard table column alignment */
+.fc-event .fc-content {
+    text-align: center;
+}
+
+.fc-event .fc-time {
+    text-align: center;
+}
+
+/* Center status and action columns in the table */
+.fc-event .fc-title {
+    text-align: center;
+    display: block;
+}
+
+.fc-event .fc-status {
+    text-align: center;
+    display: block;
+}
+
+/* Center Status and Action columns in all dashboard tables */
+.table th:last-child,
+.table td:last-child,
+.table th:nth-last-child(2),
+.table td:nth-last-child(2),
+.table th[style*="Status"],
+.table td[style*="Status"],
+.table th[style*="Action"],
+.table td[style*="Action"] {
+    text-align: center !important;
+}
+
+/* Center content within Status and Action columns */
+.table td:last-child *,
+.table td:nth-last-child(2) *,
+.table td[style*="Status"] *,
+.table td[style*="Action"] * {
+    display: inline-block;
+    margin: 0 auto;
+}
+
+/* Center buttons and badges */
+.table .btn,
+.table .badge {
+    display: inline-block;
+    margin: 0 auto;
+}
+
+/* Center Status and Action columns in Categories table */
+.table.table-striped.projects th[style*="Status"],
+.table.table-striped.projects td:nth-child(5),
+.table.table-striped.projects th[style*="Action"],
+.table.table-striped.projects td:nth-child(6) {
+    text-align: center !important;
+}
+
+/* Center content within Status and Action columns in Categories table */
+.table.table-striped.projects td:nth-child(5) .badge,
+.table.table-striped.projects td:nth-child(6) .btn,
+.table.table-striped.projects td:nth-child(6) .project-actions {
+    display: inline-block;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* Override the text-right class in project-actions */
+.table.table-striped.projects .project-actions.text-right {
+    text-align: center !important;
+    justify-content: center;
+} 
