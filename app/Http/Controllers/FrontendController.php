@@ -26,10 +26,10 @@ class FrontendController extends Controller
     {
         $categories = Category::with([
             'services' => function($query) {
-                $query->where('status', 1) // Only active services
+                $query->where('status', 'active') // Only active services
                     ->with('employees'); // Load all employees for each service
             }
-        ])->where('status', 1)->get();
+        ])->where('status', 'active')->get();
 
         $employees = Employee::with('services')->with('user')->get();
 

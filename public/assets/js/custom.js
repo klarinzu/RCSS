@@ -1,29 +1,34 @@
         $(document).ready(function() {
+            console.log('Categories:', window.categories); // Debug log
+            console.log('Employees:', window.employees); // Debug log
 
-            const categories = @json($categories);
+            const categories = window.categories || [];
+            const employees = window.employees || [];
 
             const container = $('#categories-container'); // Target the container by ID
+            console.log('Container found:', container.length > 0); // Debug log
 
             let html = '';
-            $.each(categories, function(index, category) {
-                html += `
-            <div class="col">
-                <div class="card border h-100 category-card text-center rounded p-2" data-category="${category.id}">
-                    <div class="card-body">
-                         ${category.image ? `<img class="img-fluid w-25 mb-2" src="uploads/images/category/${category.image}">` : ""}
-                        <h5 class="card-title">${category.title}</h5>
-                        <p class="card-text">${category.body}</p>
+            if (categories && categories.length > 0) {
+                $.each(categories, function(index, category) {
+                    html += `
+                <div class="col">
+                    <div class="card border h-100 category-card text-center rounded p-2" data-category="${category.id}">
+                        <div class="card-body">
+                            ${category.image ? `<img class="img-fluid w-25 mb-2" src="uploads/images/category/${category.image}">` : ""}
+                            <h5 class="card-title">${category.title}</h5>
+                            <p class="card-text">${category.body}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
-            });
+            `;
+                });
+            } else {
+                html = '<div class="col-12 text-center"><p>No categories available.</p></div>';
+            }
 
             container.html(html); // Insert all generated HTML at once
-
-
-            const employees = @json($employees);
-            // console.log(employees);
+            console.log('HTML inserted:', html); // Debug log
 
             // Booking state
             let bookingState = {
@@ -731,7 +736,7 @@
 
                 // Submit via AJAX
                 $.ajax({
-                    url: '/bookings',
+                    url: '/appointments',
                     method: 'POST',
                     data: bookingData,
                     success: function(response) {

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\CategoryController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\HolidayController;
 
 use Illuminate\Http\Request;
 
@@ -24,59 +26,55 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    //user
-    Route::resource('user',UserController::class)->middleware('permission:users.view| users.create | users.edit | users.delete');
-    //update user password
+    // Admin routes
+    Route::prefix('admin')->name('admin.')->group(function () {
+        // Users
+        Route::resource('users', UserController::class)->middleware('permission:users.view|users.create|users.edit|users.delete');
+        Route::get('users-trash', [UserController::class, 'trashView'])->name('users.trash');
+        Route::get('users-restore/{id}', [UserController::class, 'restore'])->name('users.restore');
+        Route::delete('users-delete/{id}', [UserController::class, 'force_delete'])->name('users.force.delete');
 
-    //profile page
-    Route::get('profile',[ProfileController::class,'index'])->name('profile');
-    //user profile update
-    Route::patch('profile-update/{user}',[ProfileController::class,'profileUpdate'])->name('user.profile.update');
-    Route::patch('user/pasword-update/{user}',[UserController::class,'password_update'])->name('user.password.update');
-    Route::put('user/profile-pic/{user}',[UserController::class,'updateProfileImage'])->name('user.profile.image.update');
+        // Settings
+        Route::get('settings', [SettingController::class, 'index'])->name('settings.index')->middleware('permission:settings.view');
+        Route::post('settings/{setting}', [SettingController::class, 'update'])->name('settings.update')->middleware('permission:settings.update');
 
-    //delete profile image
-    Route::patch('delete-profile-image/{user}',[UserController::class,'deleteProfileImage'])->name('delete.profile.image');
-    //trash view for users
-    Route::get('user-trash', [UserController::class, 'trashView'])->name('user.trash');
-    Route::get('user-restore/{id}', [UserController::class, 'restore'])->name('user.restore');
-    //deleted permanently
-    Route::delete('user-delete/{id}', [UserController::class, 'force_delete'])->name('user.force.delete');
+        // Categories
+        Route::resource('categories', CategoryController::class)->middleware('permission:categories.view|categories.create|categories.edit|categories.delete');
 
-    Route::get('settings', [SettingController::class, 'index'])->name('setting')->middleware('permission:setting update');
-    Route::post('settings/{setting}', [SettingController::class, 'update'])->name('setting.update');
+        // Services
+        Route::resource('services', ServiceController::class)->middleware('permission:services.view|services.create|services.edit|services.delete');
+        Route::get('services-trash', [ServiceController::class, 'trashView'])->name('services.trash');
+        Route::get('services-restore/{id}', [ServiceController::class, 'restore'])->name('services.restore');
+        Route::delete('services-delete/{id}', [ServiceController::class, 'force_delete'])->name('services.force.delete');
 
+        // Employees
+        Route::resource('employees', EmployeeController::class)->middleware('permission:employees.view|employees.create|employees.edit|employees.delete');
+        Route::get('employee-bookings', [UserController::class, 'EmployeeBookings'])->name('employees.bookings');
+        Route::get('employee-booking/{id}', [UserController::class, 'show'])->name('employees.booking.detail');
 
-    Route::resource('category', CategoryController::class)->middleware('permission:categories.view| categories.create | categories.edit | categories.delete');
+        // Holidays
+        Route::resource('holidays', HolidayController::class)->middleware('permission:holidays.view|holidays.create|holidays.edit|holidays.delete');
 
+        // Summernote
+        Route::post('summernote', [SummerNoteController::class, 'summerUpload'])->name('summernote.upload')->middleware('permission:settings.update');
+        Route::post('summernote/delete', [SummerNoteController::class, 'summerDelete'])->name('summernote.delete')->middleware('permission:settings.update');
+    });
 
-    // Services
-    Route::resource('service', ServiceController::class)->middleware('permission:services.view| services.create | services.edit | services.delete');
-    Route::get('service-trash', [ServiceController::class, 'trashView'])->name('service.trash');
-    Route::get('service-restore/{id}', [ServiceController::class, 'restore'])->name('service.restore');
-    //deleted permanently
-    Route::delete('service-delete/{id}', [ServiceController::class, 'force_delete'])->name('service.force.delete');
+    // Profile routes
+    Route::get('profile', [ProfileController::class, 'index'])->name('profile.show');
+    Route::patch('profile-update/{user}', [ProfileController::class, 'profileUpdate'])->name('profile.update');
+    Route::patch('profile-password/{user}', [ProfileController::class, 'passwordUpdate'])->name('profile.password');
+    Route::put('profile-pic/{user}', [ProfileController::class, 'updateProfileImage'])->name('profile.image.update');
+    Route::patch('delete-profile-image/{user}', [ProfileController::class, 'deleteProfileImage'])->name('profile.image.delete');
 
+    // Employee profile routes
+    Route::patch('employee-profile-update/{employee}', [ProfileController::class, 'employeeProfileUpdate'])->name('employee.profile.update');
+    Route::put('employee-bio/{employee}', [EmployeeController::class, 'updateBio'])->name('employee.bio.update');
 
-    //summernote image
-    Route::post('summernote',[SummerNoteController::class,'summerUpload'])->name('summer.upload.image');
-    Route::post('summernote/delete',[SummerNoteController::class,'summerDelete'])->name('summer.delete.image');
-
-
-    //employee
-    // Route::resource('user',UserController::class);
-    Route::get('employee-booking',[UserController::class,'EmployeeBookings'])->name('employee.bookings');
-    Route::get('my-booking/{id}',[UserController::class,'show'])->name('employee.booking.detail');
-
-    // employee profile self data update
-    Route::patch('employe-profile-update/{employee}',[ProfileController::class,'employeeProfileUpdate'])->name('employee.profile.update');
-
-    //employee bio
-    Route::put('employee-bio/{employee}',[EmployeeController::class,'updateBio'])->name('employee.bio.update');
-
-
-
-
+    // Appointments
+    Route::get('appointments', [AppointmentController::class, 'index'])->name('appointments.index')->middleware('permission:appointments.view| appointments.create | services.appointments | appointments.delete');
+    Route::post('appointments/update-status', [AppointmentController::class, 'updateStatus'])->name('appointments.update.status');
+    Route::post('update-status', [DashboardController::class, 'updateStatus'])->name('dashboard.update.status');
 
     Route::get('test',function(Request $request){
         return view('test',  [
@@ -95,6 +93,10 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 
 
 //frontend routes
+Route::get('/services', [FrontendController::class, 'services'])->name('services');
+Route::get('/about', [FrontendController::class, 'about'])->name('about');
+Route::get('/contact', [FrontendController::class, 'contact'])->name('contact');
+
 //fetch services from categories
 Route::get('/categories/{category}/services', [FrontendController::class, 'getServices'])->name('get.services');
 

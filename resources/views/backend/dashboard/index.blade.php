@@ -5,40 +5,48 @@
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1>Appointments</h1>
-        <div class="category-stats">
-            <h5 class="mb-3" style="font-weight: bold;">Pending Appointments:</h5>
-            <div class="row">
-                @foreach($categories as $category)
-                    <div class="col-auto">
-                        <div class="category-card">
-                            <div class="category-icon">
-                                <i class="fas fa-calendar-check"></i>
-                            </div>
-                            <div class="category-info">
-                                <span class="category-name">{{ $category->title }}</span>
-                                <span class="category-count">{{ $category->current_appointments_count ?? 0 }}</span>
+        @if(auth()->user()->hasRole('admin') || auth()->user()->employee)
+            <div class="category-stats">
+                <h5 class="mb-3" style="font-weight: bold;">Pending Appointments:</h5>
+                <div class="row">
+                    @foreach($categories as $category)
+                        <div class="col-auto">
+                            <div class="category-card">
+                                <div class="category-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="category-info">
+                                    <span class="category-name">{{ $category->title }}</span>
+                                    <span class="category-count">{{ $category->current_appointments_count ?? 0 }}</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                @endforeach
+                    @endforeach
+                </div>
             </div>
-        </div>
+        @endif
     </div>
     @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show mt-2" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-success alert-dismissable mt-2">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            <strong>{{ session('success') }}</strong>
         </div>
     @endif
     @if (session('error'))
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
         </div>
     @endif
 @stop
 
 @section('content')
+
+
     <div class="container-fluid px-0">
         <div class="row">
             <div class="col-sm-12">
@@ -52,12 +60,14 @@
         @csrf
         <input type="hidden" name="appointment_id" id="modalAppointmentId">
 
-        <div class="modal fade" id="appointmentModal" tabindex="-1" aria-labelledby="appointmentModalLabel" aria-hidden="true">
+        <div class="modal fade" id="appointmentModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="appointmentModalLabel">Appointment Details</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5 class="modal-title">Appointment Details</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
                     </div>
                     <div class="modal-body">
                         <p><strong>Client:</strong> <span id="modalAppointmentName">N/A</span></p>
@@ -66,6 +76,7 @@
                         <p><strong>Phone:</strong> <span id="modalPhone">N/A</span></p>
                         <p><strong>Staff:</strong> <span id="modalStaff">N/A</span></p>
                         <p><strong>Date & Time:</strong> <span id="modalStartTime">N/A</span></p>
+                        {{-- <p><strong>End:</strong> <span id="modalEndTime">N/A</span></p> --}}
                         <p><strong>Amount: PHP</strong> <span id="modalAmount">N/A</span></p>
                         <p><strong>Notes:</strong> <span id="modalNotes">N/A</span></p>
                         <p><strong>Current Status:</strong> <span id="modalStatusBadge">N/A</span></p>
@@ -84,7 +95,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary" id="updateStatusBtn">
                             <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                             Update Status
@@ -94,6 +105,7 @@
             </div>
         </div>
     </form>
+
 @stop
 
 @section('css')
@@ -161,98 +173,82 @@
             font-size: 1.2em;
         }
 
-        /* Calendar View Optimizations */
-        .fc-view {
-            background: white;
+        /* DAILY VIEW OPTIMIZATIONS */
+        .fc-agendaDay-view .fc-time-grid-container {
+            height: auto !important;
         }
 
-        .fc-event {
-            border-radius: 4px;
-            border: none;
-            padding: 2px 4px;
-            margin: 1px 0;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        .fc-agendaDay-view .fc-event {
+            margin: 1px 2px;
+            border-radius: 3px;
         }
 
-        .fc-event:hover {
-            transform: scale(1.02);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .fc-time-grid-event {
-            min-height: 25px;
-        }
-
-        .fc-time-grid-event .fc-content {
-            padding: 2px 4px;
-        }
-
-        .fc-time-grid-event .fc-time {
+        .fc-agendaDay-view .fc-event.short-event {
+            height: 30px;
             font-size: 0.85em;
-            padding: 0 4px;
+            padding: 2px;
         }
 
-        .fc-time-grid-event .fc-title {
-            font-size: 0.9em;
-            font-weight: 500;
+        .fc-agendaDay-view .fc-event .fc-content {
+            white-space: normal;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .fc-time-grid {
+        .fc-agendaDay-view .fc-time {
+            width: 50px !important;
+        }
+
+        .fc-agendaDay-view .fc-time-grid {
             min-height: 600px !important;
         }
 
-        .fc-slats td {
-            height: 40px;
+        .fc-agendaDay-view .fc-event.fc-short-event {
+            height: 35px;
+            font-size: 0.85em;
         }
 
-        .fc-axis {
+        .fc-agendaDay-view .fc-time {
             width: 70px !important;
             padding: 0 10px;
         }
 
-        .fc-content-skeleton {
+        .fc-agendaDay-view .fc-axis {
+            width: 70px !important;
+        }
+
+        .fc-agendaDay-view .fc-content-skeleton {
             padding-bottom: 5px;
         }
 
-        /* Modal Styles */
-        .modal-content {
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        .fc-agendaDay-view .fc-slats tr {
+            height: 40px;
         }
 
-        .modal-header {
-            border-bottom: 1px solid #dee2e6;
-            background-color: #f8f9fa;
-            border-radius: 8px 8px 0 0;
+        .fc-event {
+            opacity: 0.9;
+            transition: opacity 0.2s;
         }
 
-        .modal-footer {
-            border-top: 1px solid #dee2e6;
-            background-color: #f8f9fa;
-            border-radius: 0 0 8px 8px;
-        }
-
-        .btn-close {
-            padding: 0.5rem;
-            margin: -0.5rem -0.5rem -0.5rem auto;
+        .fc-event:hover {
+            opacity: 1;
+            z-index: 1000 !important;
         }
     </style>
 @stop
 
 @section('js')
+
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@3.10.2/dist/fullcalendar.min.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Bootstrap 5 tooltips
-            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
 
-            // Get appointments data
-            var appointments = {!! json_encode($appointments ?? []) !!};
+
+    <script>
+        $(document).ready(function() {
+            // Initialize toasts first
+            // $('.toast').toast({
+            //     delay: 5000
+            // });
 
             // Initialize calendar
             $('#calendar').fullCalendar({
@@ -266,7 +262,7 @@
                 slotDuration: '00:30:00',
                 minTime: '06:00:00',
                 maxTime: '22:00:00',
-                events: appointments,
+                events: @json($appointments ?? []),
                 eventRender: function(event, element) {
                     element.tooltip({
                         title: event.description || 'No description',
@@ -276,75 +272,81 @@
                     });
                 },
                 eventClick: function(calEvent, jsEvent, view) {
-                    // Populate modal with event data
-                    $('#modalAppointmentId').val(calEvent.id);
-                    $('#modalAppointmentName').text(calEvent.name || calEvent.title.split(' - ')[0] || 'N/A');
-                    $('#modalService').text(calEvent.service_title || calEvent.title.split(' - ')[1] || 'N/A');
-                    $('#modalEmail').text(calEvent.email || 'N/A');
-                    $('#modalPhone').text(calEvent.phone || 'N/A');
-                    $('#modalStaff').text(calEvent.staff || 'N/A');
-                    $('#modalAmount').text(calEvent.amount || 'N/A');
-                    $('#modalNotes').text(calEvent.description || calEvent.notes || 'N/A');
-                    $('#modalStartTime').text(moment(calEvent.start).format('MM-DD-YYYY h:mm A'));
-                    $('#modalEndTime').text(calEvent.end ? moment(calEvent.end).format('MM-DD-YYYY h:mm A') : 'N/A');
+    // Populate modal with event data
+    $('#modalAppointmentId').val(calEvent.id);
+    $('#modalAppointmentName').text(calEvent.name || calEvent.title.split(' - ')[0] || 'N/A');
+    $('#modalService').text(calEvent.service_title || calEvent.title.split(' - ')[1] || 'N/A');
+    $('#modalEmail').text(calEvent.email || 'N/A');
+    $('#modalPhone').text(calEvent.phone || 'N/A');
+    $('#modalStaff').text(calEvent.staff || 'N/A');
+    $('#modalAmount').text(calEvent.amount || 'N/A');
+    $('#modalNotes').text(calEvent.description || calEvent.notes || 'N/A');
+    $('#modalStartTime').text(moment(calEvent.start).format('MM-DD-YYYY h:mm A'));
+    $('#modalEndTime').text(calEvent.end ? moment(calEvent.end).format('MM-DD-YYYY h:mm A') : 'N/A');
 
-                    // Get the status from the calendar event
-                    var status = calEvent.status || 'Pending payment';
-                    $('#modalStatusSelect').val(status);
+    // Get the status from the calendar event
+    var status = calEvent.status || 'Pending payment';
+    $('#modalStatusSelect').val(status);
 
-                    // Set status badge
-                    var statusColors = {
-                        'Pending payment': '#f39c12',
-                        'Processing': '#3498db',
-                        'Confirmed': '#2ecc71',
-                        'Cancelled': '#ff0000',
-                        'Completed': '#008000',
-                        'On Hold': '#95a5a6',
-                        'No Show': '#e67e22'
-                    };
+    // Set status badge
+    var statusColors = {
+        'Pending payment': '#f39c12',
+        'Processing': '#3498db',
+        'Confirmed': '#2ecc71',
+        'Cancelled': '#ff0000',
+        'Completed': '#008000',
+        'On Hold': '#95a5a6',
+        'No Show': '#e67e22',
+    };
 
-                    var badgeColor = statusColors[status] || '#7f8c8d';
-                    $('#modalStatusBadge').html(
-                        '<span class="badge px-2 py-1" style="background-color: ' + badgeColor + '; color: white;">' + status + '</span>'
-                    );
+    var badgeColor = statusColors[status] || '#7f8c8d';
+    $('#modalStatusBadge').html(
+        `<span class="badge px-2 py-1" style="background-color: ${badgeColor}; color: white;">${status}</span>`
+    );
 
-                    $('#appointmentModal').modal('show');
-                }
+    $('#appointmentModal').modal('show');
+}
             });
 
-            // Update modal event handlers to use Bootstrap 5 syntax
-            $('#appointmentModal').on('show.bs.modal', function (event) {
-                // Modal show logic will be handled by the event click handler
-            });
-
-            // Form submission handling
+            // Single form submission handler
             $('#appointmentStatusForm').on('submit', function(e) {
                 e.preventDefault();
-                var $form = $(this);
-                var $submitBtn = $('#updateStatusBtn');
-                var $spinner = $submitBtn.find('.spinner-border');
-
-                $submitBtn.prop('disabled', true);
-                $spinner.removeClass('d-none');
-
+                const form = $(this);
+                const submitBtn = $('#updateStatusBtn');
+                const spinner = submitBtn.find('.spinner-border');
+                
+                // Show spinner and disable button
+                spinner.removeClass('d-none');
+                submitBtn.prop('disabled', true);
+                
+                // Submit form via AJAX
                 $.ajax({
-                    url: $form.attr('action'),
+                    url: form.attr('action'),
                     method: 'POST',
-                    data: $form.serialize(),
+                    data: form.serialize(),
                     success: function(response) {
+                        // Close modal
                         $('#appointmentModal').modal('hide');
-                        // Refresh calendar or show success message
+                        // Reload page to show updated status
                         location.reload();
                     },
                     error: function(xhr) {
-                        alert('An error occurred while updating the status.');
-                    },
-                    complete: function() {
-                        $submitBtn.prop('disabled', false);
-                        $spinner.addClass('d-none');
+                        // Show error message
+                        alert('Failed to update status. Please try again.');
+                        // Reset button state
+                        spinner.addClass('d-none');
+                        submitBtn.prop('disabled', false);
                     }
                 });
             });
         });
     </script>
+
+    <script>
+        $(document).ready(function() {
+            $(".alert").delay(2000).slideUp(300);
+        });
+    </script>
+
+
 @stop
